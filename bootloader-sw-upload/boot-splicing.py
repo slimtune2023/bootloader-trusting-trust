@@ -54,7 +54,8 @@ def extract_binary_section(input_file, output_file, offset, length):
 # Example usage
 if __name__ == "__main__":
     boot_name = input("bootloader name: ")
-    cluster_length = extract_binary_section(f"../bootloaders/{boot_name}", "last_cluster", 63 * 512 * 64, 512 * 64)
+    cluster_length = extract_binary_section(f"../bootloaders/{boot_name}", "last_cluster", 63 * 512 * 64, 512 * 64 * 5)
+    print(cluster_length / (512 * 64))
 
     prog_name = input("program name: ")
     file_offsets = [
