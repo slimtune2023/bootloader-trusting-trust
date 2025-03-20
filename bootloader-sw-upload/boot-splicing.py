@@ -25,7 +25,7 @@ def splice_binary_files(output_file, file_offsets):
                 f.seek(offset)
                 f.write(src.read())
     
-    print(f"Binary file '{output_file}' created successfully.")
+    print(f"Success!")
 
 def extract_binary_section(input_file, output_file, offset, length):
     """
@@ -42,21 +42,25 @@ def extract_binary_section(input_file, output_file, offset, length):
     
     # Insert the length of data as the first four bytes
     data_with_size = len(data).to_bytes(4, 'little') + data
-    print(data_with_size[0:4])
-    print(hex(len(data_with_size) - 4))
+    # print(data_with_size[0:4])
+    # print(hex(len(data_with_size) - 4))
     
     with open(output_file, 'wb') as f:
         f.write(data_with_size)
     
-    print(f"Extracted section saved to '{output_file}'.")
+    # print(f"Extracted section saved to '{output_file}'.")
     return len(data_with_size) - 4
 
 # Example usage
 if __name__ == "__main__":
-    cluster_length = extract_binary_section("../bootloaders/james.img", "last_cluster", 63 * 512 * 64, 512 * 64)
+    boot_name = input("bootloader name: ")
+    cluster_length = extract_binary_section(f"../bootloaders/{boot_name}", "last_cluster", 63 * 512 * 64, 512 * 64)
 
+    prog_name = input("program name: ")
     file_offsets = [
-        ("boot-sw-upload-led.bin", 0),   # Place file1.bin at offset 0
+        (prog_name, 0),   # Place file1.bin at offset 0
         ("last_cluster", 40960)  # 0xA000 (address 0x12000)
     ]
-    splice_binary_files("led-test.bin", file_offsets)    
+
+    combined_name = input("merged bin name: ")
+    splice_binary_files(f"{combined_name}", file_offsets)    
