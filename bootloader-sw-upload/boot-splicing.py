@@ -53,10 +53,10 @@ def extract_binary_section(input_file, output_file, offset, length):
 
 # Example usage
 if __name__ == "__main__":
-    cluster_length = extract_binary_section("sai.img", "last_cluster", 63 * 512 * 64, 512 * 64)
+    cluster_length = extract_binary_section("../bootloaders/james.img", "last_cluster", 63 * 512 * 64, 512 * 64)
 
     file_offsets = [
-        ("boot-sw-upload.bin", 0),   # Place file1.bin at offset 0
+        ("boot-sw-upload-led.bin", 0),   # Place file1.bin at offset 0
         ("last_cluster", 40960)  # 0xA000 (address 0x12000)
     ]
-    splice_binary_files("combined.bin", file_offsets)    
+    splice_binary_files("led-test.bin", file_offsets)    

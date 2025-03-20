@@ -387,8 +387,8 @@ void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, 
   uint32_t chain_length = get_cluster_chain_length(fs, start_cluster);
   int n_bytes = nbytes;
 
-  printk("write cluster chain function:\n");
-  printk("chain_length = %d, start_cluster = %d, n_bytes = %d\n", chain_length, start_cluster, n_bytes);
+  // printk("write cluster chain function:\n");
+  // printk("chain_length = %d, start_cluster = %d, n_bytes = %d\n", chain_length, start_cluster, n_bytes);
 
   // TODO: As long as we have bytes left to write and clusters to write them
   // to, walk the cluster chain writing them out.
@@ -405,14 +405,14 @@ void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, 
     start_cluster = (start_cluster << 4) >> 4;
   }
 
-  printk("prev_cluster = %d\n", prev_cluster);
-  printk("chain_length = %d, start_cluster = %d, n_bytes = %d\n", chain_length, start_cluster, n_bytes);
+  // printk("prev_cluster = %d\n", prev_cluster);
+  // printk("chain_length = %d, start_cluster = %d, n_bytes = %d\n", chain_length, start_cluster, n_bytes);
 
   // TODO: If we run out of clusters to write to, find free clusters using the
   // FAT and continue writing the bytes out.  Update the FAT to reflect the new
   // cluster.
   if (n_bytes > 0 && chain_length == 0) {
-    printk("case 1:\n");
+    // printk("case 1:\n");
     while (n_bytes > 0) {
       uint32_t free_cluster = find_free_cluster(fs, 3);
       pi_sd_write(data, cluster_to_lba(fs, free_cluster), fs->sectors_per_cluster);
@@ -421,8 +421,8 @@ void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, 
 
       // update fat to have link between prev_cluster and free_cluster
       *(fs->fat + prev_cluster) = free_cluster;
-      printk("prev_cluster = %d, free_cluster = %d\n", prev_cluster, free_cluster);
-      printk("n_bytes = %d\n", n_bytes);
+      // printk("prev_cluster = %d, free_cluster = %d\n", prev_cluster, free_cluster);
+      // printk("n_bytes = %d\n", n_bytes);
       prev_cluster = free_cluster;
     }
 
@@ -434,7 +434,7 @@ void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, 
   // the final cluster as "LAST_CLUSTER" in the FAT, then free all the clusters
   // later in the chain.
   if (n_bytes <= 0 && chain_length > 0) {
-    printk("case 2:\n");
+    // printk("case 2:\n");
     uint32_t free_chain_start = 0;
 
     if (prev_cluster == 0) {
@@ -450,7 +450,7 @@ void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, 
       free_chain_start = *(fs->fat + cluster_id);
 
       assert(cluster_id < fs->n_entries);
-      printk("freeing cluster %d\n", cluster_id);
+      // printk("freeing cluster %d\n", cluster_id);
       *(fs->fat + cluster_id) = 0;
     }
 
@@ -458,7 +458,7 @@ void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, 
     if (prev_cluster != 0) {
       *(fs->fat + prev_cluster) = 0xffffffff;
     }
-    printk("last cluster: %d\n", prev_cluster);
+    // printk("last cluster: %d\n", prev_cluster);
   }
 
   // TODO: Ensure that the last cluster in the chain is marked "LAST_CLUSTER".
