@@ -6,18 +6,10 @@
 #define MB(x) ((x)*1024*1024)
 
 #define RESERVED 0x6000000
-#define RESERVED_CODE = 0x6100000
 
 // armv6 has 16 different domains with their own privileges.
 // just pick one for the kernel.
 enum { dom_kern = 1 };
-
-// reboot
-enum { 
-    REBOOT_BASE = 0x20100000,
-    REBOOT = 0x20100024,
-    TIMER = 0x20003004,
-};
 
 // UART
 enum {
@@ -80,22 +72,29 @@ cp_asm_get(cp15_fault_addr, p15, 0, c6, c0, 0);
 cp_asm_get(cp15_dfsr, p15, 0, c5, c0, 0);
 cp_asm_get(cp15_ifsr, p15, 0, c5, c0, 1);
 
-#define BCM2708_PERI_BASE           0x20000000
-#define PM_BASE                     (BCM2708_PERI_BASE + 0x100000) /* Power Management, Reset controller and Watchdog registers */
-#define PM_RSTC                     (PM_BASE+0x1c)
-#define PM_WDOG                     (PM_BASE+0x24)
-#define PM_WDOG_RESET               0000000000
-#define PM_PASSWORD                 0x5a000000
-#define PM_WDOG_TIME_SET            0x000fffff
-#define PM_RSTC_WRCFG_CLR           0xffffffcf
-#define PM_RSTC_WRCFG_SET           0x00000030
-#define PM_RSTC_WRCFG_FULL_RESET    0x00000020
-#define PM_RSTC_RESET               0x00000102
+void cleanup(void) {
+    // mmu_disable();
+
+    uint32_t nbytes = *(uint32_t *)RESERVED;
+    char *buf = (char *)(RESERVED + 4);
+    printk("\n-----------------\nRECIEVED MESSAGE (nbytes = %x): \n", nbytes);
+    for (int i = 0; i < nbytes; i++) {
+        printk("%c", buf[i]);
+    }\
+    printk("\n-----------------\n\n");
+    printk("SUCCESS!!\n");
+
+    uart_flush_tx();
+    delay_ms(10);
+
+    // rpi_reboot();
+}
 
 // Fault handler to verify exception details
 static void data_abort_handler(regs_t *r) {
     mmu_disable();
 
+    // printk("data abort\n");
     uint32_t fault_addr = cp15_fault_addr_get();
     uint32_t dfsr = cp15_dfsr_get();
     uint32_t write = (dfsr >> 11) & 1;
@@ -104,35 +103,39 @@ static void data_abort_handler(regs_t *r) {
 
     r->regs[15]+=4;
 
-    // enum { no_user = perm_rw_priv };
+    // printk("FAULT: PC = %x, Fault Address = %x, DFSR = %x, WRITE = %x\n", pc, fault_addr, dfsr, write);
+
+    enum { no_user = perm_rw_priv };
+
+    // pin_t dev  = pin_mk_global(dom_kern, no_user, MEM_device);
+    // pin_mmu_sec(4, SEG_BCM_0, SEG_BCM_0, dev); 
 
     if (fault_addr == AUX_STAT && !write) {
-        printk("*\n");
+        // printk("waiting for uart to free\n");
         do {
             r->regs[0] = GET32(AUX_STAT);
-        } while (!((r->regs[0] >> 9) & 1));
-        printk("timer: %x, %x\n", r->regs[0], ((r->regs[0] >> 9) & 1));
+        } while (!(GET32(AUX_STAT) & 2));
+
+        // printk("AUX_STAT: %x\n", r->regs[0]);
     } else if (fault_addr == AUX_IO && write) {
-        printk("*%c", (char)r->regs[1]);
+        // printk("TRIED TO WRITE: %c\n", r->regs[1]);
+        printk("%c", (char)r->regs[1]);
         uint32_t ct = *(uint32_t *)RESERVED;
         *(char *)(RESERVED + 4 + ct) = (char)r->regs[1];
         (*(uint32_t *)RESERVED) ++;
-    } else if (fault_addr == REBOOT && write) {
-        uint32_t nbytes = *(uint32_t *)RESERVED;
-        char *buf = (char *)(RESERVED + 4);
-        printk("\n-----------------\nRECIEVED MESSAGE (nbytes = %x): \n", nbytes);
-        for (int i = 0; i < nbytes; i++) {
-            printk("%c", buf[i]);
-        }
-        printk("\n-----------------\n\n");
 
-        switchto(r);
+        if (ct >= 6) {
+            if (strncmp((char *)(RESERVED + 4 + ct - 6), "DONE!!!", 7) == 0) {
+                cleanup();
+                delay_ms(1000);
+                switchto(r);
+            }
+        }
     } else {
         printk("FAULT: PC = %x, Fault Address = %x, DFSR = %x, WRITE = %x\n", pc, fault_addr, dfsr, write);
-        if (write) {
-            PUT32()
-        }
     }
+
+    // domain_access_ctrl_set(DOM_client << (dom_kern * 2));
 
     mmu_enable();
 
@@ -157,6 +160,11 @@ static void data_abort_handler(regs_t *r) {
 
 //     switchto(r);
 //     // domain_access_ctrl_set(DOM_client << (dom_kern * 2));
+// }
+
+// void patch_instruction(uint32_t target, uint32_t new) {
+//     volatile unsigned int *ptr = (unsigned int *)target;
+//     *ptr = new;
 // }
 
 void notmain(void) {
@@ -256,8 +264,8 @@ void notmain(void) {
     pin_mmu_sec(3, SEG_INT_STACK, SEG_INT_STACK, kern); 
 
     // map all device memory to itself.  ("identity map")
-    // pin_mmu_sec(4, SEG_BCM_0, SEG_BCM_0, dev); 
-    // pin_mmu_sec(5, SEG_BCM_1, SEG_BCM_1, dev); 
+    pin_mmu_sec(4, SEG_BCM_0, SEG_BCM_0, dev); 
+    pin_mmu_sec(5, SEG_BCM_1, SEG_BCM_1, dev); 
     // pin_mmu_sec(6, SEG_BCM_2, SEG_BCM_2, dev); 
 
     // printk("At end:\n");
@@ -294,17 +302,21 @@ void notmain(void) {
     
     // no uart
     pin_mmu_sec(6, SEG_BCM_2, SEG_BCM_2, no_access); 
-    // no reboot
-    // pin_mmu_sec(5, REBOOT_BASE, REBOOT_BASE, no_access); 
 
     // reset reserved section
     *(uint32_t *)RESERVED = 0;
 
+    // uint32_t change = 0x8478;
+    // uint32_t go = 0x8188;
+    // // uint32_t encoding = 0xeb000000 | (((go - (change + 8)) / 4) & 0xffffff);
+    // uint32_t encoding = 0xebffff44;
+    // printk("encoding: %x\n", encoding);
+
+    // patch_instruction(change, encoding);
+
+    // printk("%x: %x\n", change, *(uint32_t *)change);
+
     mmu_enable();
 
     printk("test\n");
-
-    // mmu_disable();
-
-    printk("SUCCESS!!\n");
 }
