@@ -6,6 +6,7 @@
 #define MB(x) ((x)*1024*1024)
 
 #define RESERVED 0x6000000
+#define RESERVED_CODE = 0x6100000
 
 // armv6 has 16 different domains with their own privileges.
 // just pick one for the kernel.
@@ -15,6 +16,7 @@ enum { dom_kern = 1 };
 enum { 
     REBOOT_BASE = 0x20100000,
     REBOOT = 0x20100024,
+    TIMER = 0x20003004,
 };
 
 // UART
@@ -78,11 +80,22 @@ cp_asm_get(cp15_fault_addr, p15, 0, c6, c0, 0);
 cp_asm_get(cp15_dfsr, p15, 0, c5, c0, 0);
 cp_asm_get(cp15_ifsr, p15, 0, c5, c0, 1);
 
+#define BCM2708_PERI_BASE           0x20000000
+#define PM_BASE                     (BCM2708_PERI_BASE + 0x100000) /* Power Management, Reset controller and Watchdog registers */
+#define PM_RSTC                     (PM_BASE+0x1c)
+#define PM_WDOG                     (PM_BASE+0x24)
+#define PM_WDOG_RESET               0000000000
+#define PM_PASSWORD                 0x5a000000
+#define PM_WDOG_TIME_SET            0x000fffff
+#define PM_RSTC_WRCFG_CLR           0xffffffcf
+#define PM_RSTC_WRCFG_SET           0x00000030
+#define PM_RSTC_WRCFG_FULL_RESET    0x00000020
+#define PM_RSTC_RESET               0x00000102
+
 // Fault handler to verify exception details
 static void data_abort_handler(regs_t *r) {
     mmu_disable();
 
-    // printk("data abort\n");
     uint32_t fault_addr = cp15_fault_addr_get();
     uint32_t dfsr = cp15_dfsr_get();
     uint32_t write = (dfsr >> 11) & 1;
@@ -91,31 +104,35 @@ static void data_abort_handler(regs_t *r) {
 
     r->regs[15]+=4;
 
-    // printk("FAULT: PC = %x, Fault Address = %x, DFSR = %x, WRITE = %x\n", pc, fault_addr, dfsr, write);
-
-    enum { no_user = perm_rw_priv };
-
-    // pin_t dev  = pin_mk_global(dom_kern, no_user, MEM_device);
-    // pin_mmu_sec(4, SEG_BCM_0, SEG_BCM_0, dev); 
+    // enum { no_user = perm_rw_priv };
 
     if (fault_addr == AUX_STAT && !write) {
-        // printk("waiting for uart to free\n");
+        printk("*\n");
         do {
             r->regs[0] = GET32(AUX_STAT);
-        } while (!(GET32(AUX_STAT) & 2));
-
-        // printk("AUX_STAT: %x\n", r->regs[0]);
-    }
-
-    if (fault_addr == AUX_IO && write) {
-        // printk("TRIED TO WRITE: %c\n", r->regs[1]);
-        printk("%c", (char)r->regs[1]);
+        } while (!((r->regs[0] >> 9) & 1));
+        printk("timer: %x, %x\n", r->regs[0], ((r->regs[0] >> 9) & 1));
+    } else if (fault_addr == AUX_IO && write) {
+        printk("*%c", (char)r->regs[1]);
         uint32_t ct = *(uint32_t *)RESERVED;
         *(char *)(RESERVED + 4 + ct) = (char)r->regs[1];
         (*(uint32_t *)RESERVED) ++;
-    }
+    } else if (fault_addr == REBOOT && write) {
+        uint32_t nbytes = *(uint32_t *)RESERVED;
+        char *buf = (char *)(RESERVED + 4);
+        printk("\n-----------------\nRECIEVED MESSAGE (nbytes = %x): \n", nbytes);
+        for (int i = 0; i < nbytes; i++) {
+            printk("%c", buf[i]);
+        }
+        printk("\n-----------------\n\n");
 
-    // domain_access_ctrl_set(DOM_client << (dom_kern * 2));
+        switchto(r);
+    } else {
+        printk("FAULT: PC = %x, Fault Address = %x, DFSR = %x, WRITE = %x\n", pc, fault_addr, dfsr, write);
+        if (write) {
+            PUT32()
+        }
+    }
 
     mmu_enable();
 
@@ -276,9 +293,9 @@ void notmain(void) {
     printk("Testing printk with uart data aborts\n");
     
     // no uart
-    pin_mmu_sec(4, SEG_BCM_2, SEG_BCM_2, no_access); 
+    pin_mmu_sec(6, SEG_BCM_2, SEG_BCM_2, no_access); 
     // no reboot
-    pin_mmu_sec(5, REBOOT_BASE, REBOOT_BASE, no_access); 
+    // pin_mmu_sec(5, REBOOT_BASE, REBOOT_BASE, no_access); 
 
     // reset reserved section
     *(uint32_t *)RESERVED = 0;
@@ -287,14 +304,7 @@ void notmain(void) {
 
     printk("test\n");
 
-    mmu_disable();
+    // mmu_disable();
 
-    uint32_t nbytes = *(uint32_t *)RESERVED;
-    char *buf = (char *)(RESERVED + 4);
-    printk("\n-----------------\nRECIEVED MESSAGE (nbytes = %x): \n", nbytes);
-    for (int i = 0; i < nbytes; i++) {
-        printk("%c", buf[i]);
-    }\
-    printk("\n-----------------\n\n");
     printk("SUCCESS!!\n");
 }
