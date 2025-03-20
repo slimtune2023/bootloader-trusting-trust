@@ -25,7 +25,7 @@ static void net_put32(nrf_t *nic, uint32_t txaddr, uint32_t x) {
 // nice thing about loopback is that it's trivial to know what we are 
 // sending, whether it got through, and do flow-control to coordinate
 // sender and receiver.
-static void
+static void 
 ping_pong_ack(nrf_t *s, nrf_t *c, int verbose_p) {
     unsigned client_addr = c->rxaddr;
     unsigned server_addr = s->rxaddr;
@@ -55,8 +55,8 @@ ping_pong_ack(nrf_t *s, nrf_t *c, int verbose_p) {
     printk("About to send %d messages\n", rec_nmsg);
 
     // client to server
-    for (int i = 0; i < rec_nmsg; i++) {
-        net_put32(c, server_addr, to_send[i]);
+    for (int i = 0; i < 250; i++) {
+        net_put32(c, server_addr, to_send[i % (rec_nmsg-1)]);
         if(!net_get32(s, &got))
             ntimeout++;
         *(buf + i) = got;
