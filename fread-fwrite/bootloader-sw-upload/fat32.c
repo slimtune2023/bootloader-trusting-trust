@@ -357,7 +357,7 @@ static uint32_t find_free_cluster(fat32_fs_t *fs, uint32_t start_cluster) {
   panic("No more clusters on the disk!\n");
 }
 
-static void write_fat_to_disk(fat32_fs_t *fs) {
+void write_fat_to_disk(fat32_fs_t *fs) {
   // TODO: Write the FAT to disk.  In theory we should update every copy of the
   // FAT, but the first one is probably good enough.  A good OS would warn you
   // if the FATs are out of sync, but most OSes just read the first one without
@@ -369,7 +369,7 @@ static void write_fat_to_disk(fat32_fs_t *fs) {
 
 // Given the starting cluster index, write the data in `data` over the
 // pre-existing chain, adding new clusters to the end if necessary.
-static void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, uint32_t nbytes) {
+void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, uint32_t nbytes) {
   // Walk the cluster chain in the FAT, writing the in-memory data to the
   // referenced clusters.  If the data is longer than the cluster chain, find
   // new free clusters and add them to the end of the list.
@@ -565,6 +565,30 @@ pi_dirent_t *fat32_create(fat32_fs_t *fs, pi_dirent_t *directory, char *filename
   *dirent = dirent_convert(raw_dirents + free_dir_ind);
 
   return dirent;
+}
+
+void fat32_update_file_size(fat32_fs_t *fs, pi_dirent_t *directory, char *filename, unsigned nbytes) {
+  demand(init_p, "fat32 not initialized!");
+  if (trace_p) trace("creating %s\n", filename);
+  if (!fat32_is_valid_name(filename)) return;
+
+  // TODO: read the dirents and make sure there isn't already a file with the
+  // same name
+  uint32_t dir_n;
+  fat32_dirent_t *raw_dirents = get_dirents(fs, directory->cluster_id, &dir_n);
+
+  int ind = find_dirent_with_name(raw_dirents, dir_n, filename);
+
+  if (ind == -1) {
+    trace("file doesn't exist\n");
+    return;
+  }
+  
+  // set file size to 0
+  (raw_dirents + ind)->file_nbytes = nbytes;
+
+  // TODO: write out the updated directory to the disk
+  write_cluster_chain(fs, directory->cluster_id, (uint8_t *) raw_dirents, dir_n * sizeof(fat32_dirent_t));
 }
 
 // Delete a file, including its directory entry.

@@ -39,9 +39,25 @@ void notmain() {
   uint32_t buf[128];
 
   fat32_get_chain(&fs, &root, filename, buf, &num_clusters);
-  
-  printk("chain of clusters for file: %s\n", filename);
-  for (uint32_t i=0; i < num_clusters; i++) {
-    printk("cluster %d: %d\n", i+1, *(buf + i));
+
+  uint32_t last_cluster = *(buf + 63);  // 0x200000 address of bootloader code
+  uint32_t num_bytes = *((uint32_t *) 0x12000);
+  printk("num bytes: %d\n", num_bytes);
+
+  uint8_t *last_data = (uint8_t *) 0x12004;
+
+  write_cluster_chain(&fs, last_cluster, last_data, num_bytes);
+  write_fat_to_disk(&fs);
+  fat32_update_file_size(&fs, &root, filename, num_bytes + 63 * 64 * 512);
+
+  printk("\nListing files after write:\n");
+  files = fat32_readdir(&fs, &root);
+  printk("Got %d files.\n", files.ndirents);
+  for (int i = 0; i < files.ndirents; i++) {
+    if (files.dirents[i].is_dir_p) {
+      printk("\tD: %s (cluster %d)\n", files.dirents[i].name, files.dirents[i].cluster_id);
+    } else {
+      printk("\tF: %s (cluster %d; %d bytes)\n", files.dirents[i].name, files.dirents[i].cluster_id, files.dirents[i].nbytes);
+    }
   }
 }

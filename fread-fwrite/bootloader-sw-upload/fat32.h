@@ -53,8 +53,14 @@ pi_file_t *fat32_read(fat32_fs_t *fs, pi_dirent_t *directory, char *filename);
 // directory, *not* of the file itself.
 int fat32_rename(fat32_fs_t *fs, pi_dirent_t *directory, char *oldname, char *newname);
 
+void write_fat_to_disk(fat32_fs_t *fs);
+
+void write_cluster_chain(fat32_fs_t *fs, uint32_t start_cluster, uint8_t *data, uint32_t nbytes);
+
 // Create a new directory entry for an empty file.
 pi_dirent_t *fat32_create(fat32_fs_t *fs, pi_dirent_t *directory, char *filename, int is_dir);
+
+void fat32_update_file_size(fat32_fs_t *fs, pi_dirent_t *directory, char *filename, unsigned nbytes);
 
 // Delete a file, including its directory entry.
 int fat32_delete(fat32_fs_t *fs, pi_dirent_t *directory, char *filename);
