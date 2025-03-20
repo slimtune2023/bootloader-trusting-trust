@@ -1,0 +1,120 @@
+DEBUG:done with options: dev name=</dev/cu.usbserial-10>, pi-prog=<./tests/my_test.bin>, trace=0
+opened tty port </dev/cu.usbserial-10>.
+DEBUG:my-install: tty-usb=</dev/cu.usbserial-10> program=<./tests/my_test.bin>: about to boot
+PRINT_STRING:pi sent print: <James! About to send GET_CODE>
+PRINT_STRING:pi sent print: <James! About to send BOOT_SUCCESS>
+Before first iter:
+TRACE:lockdown_print_entries:-----  <> ----- 
+TRACE:lockdown_print_entries:  pinned TLB lockdown entries:
+TRACE:lockdown_print_entry:   idx=0
+TRACE:lockdown_print_entry:     [invalid entry 0]
+TRACE:lockdown_print_entry:   idx=1
+TRACE:lockdown_print_entry:     [invalid entry 1]
+TRACE:lockdown_print_entry:   idx=2
+TRACE:lockdown_print_entry:     [invalid entry 2]
+TRACE:lockdown_print_entry:   idx=3
+TRACE:lockdown_print_entry:     [invalid entry 3]
+TRACE:lockdown_print_entry:   idx=4
+TRACE:lockdown_print_entry:     [invalid entry 4]
+TRACE:lockdown_print_entry:   idx=5
+TRACE:lockdown_print_entry:     [invalid entry 5]
+TRACE:lockdown_print_entry:   idx=6
+TRACE:lockdown_print_entry:     [invalid entry 6]
+TRACE:lockdown_print_entry:   idx=7
+TRACE:lockdown_print_entry:     [invalid entry 7]
+TRACE:lockdown_print_entries:----- ---------------------------------- 
+asid: 0x0
+asid: 0x0
+asid: 0x0
+asid: 0x0
+asid: 0x0
+asid: 0x0
+asid: 0x0
+At end:
+TRACE:lockdown_print_entries:-----  <> ----- 
+TRACE:lockdown_print_entries:  pinned TLB lockdown entries:
+TRACE:lockdown_print_entry:   idx=0
+TRACE:lockdown_print_entry:     va_ent=0x200: va=0x0|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0xc3: pa=0x0|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x88: dom=1|xn=0|tex=1|C=0|B=0
+TRACE:lockdown_print_entry:   idx=1
+TRACE:lockdown_print_entry:     va_ent=0x100200: va=0x100|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x1000c3: pa=0x100|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x88: dom=1|xn=0|tex=1|C=0|B=0
+TRACE:lockdown_print_entry:   idx=2
+TRACE:lockdown_print_entry:     va_ent=0x7f00200: va=0x7f00|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x7f000c3: pa=0x7f00|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x88: dom=1|xn=0|tex=1|C=0|B=0
+TRACE:lockdown_print_entry:   idx=3
+TRACE:lockdown_print_entry:     va_ent=0x8f00200: va=0x8f00|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x8f000c3: pa=0x8f00|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x88: dom=1|xn=0|tex=1|C=0|B=0
+TRACE:lockdown_print_entry:   idx=4
+TRACE:lockdown_print_entry:     va_ent=0x20000200: va=0x20000|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x200000c3: pa=0x20000|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x80: dom=1|xn=0|tex=0|C=0|B=0
+TRACE:lockdown_print_entry:   idx=5
+TRACE:lockdown_print_entry:     va_ent=0x20100200: va=0x20100|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x201000c3: pa=0x20100|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x80: dom=1|xn=0|tex=0|C=0|B=0
+TRACE:lockdown_print_entry:   idx=6
+TRACE:lockdown_print_entry:     va_ent=0x20200200: va=0x20200|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x202000c3: pa=0x20200|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x80: dom=1|xn=0|tex=0|C=0|B=0
+TRACE:lockdown_print_entry:   idx=7
+TRACE:lockdown_print_entry:     [invalid entry 7]
+TRACE:lockdown_print_entries:----- ---------------------------------- 
+TRACE:notmain:about to enable
+MMU enabled
+Testing LOAD fault at 0x20000000
+asid: 0x0
+TRACE:lockdown_print_entries:-----  <> ----- 
+TRACE:lockdown_print_entries:  pinned TLB lockdown entries:
+TRACE:lockdown_print_entry:   idx=0
+TRACE:lockdown_print_entry:     va_ent=0x200: va=0x0|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0xc3: pa=0x0|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x88: dom=1|xn=0|tex=1|C=0|B=0
+TRACE:lockdown_print_entry:   idx=1
+TRACE:lockdown_print_entry:     va_ent=0x100200: va=0x100|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x1000c3: pa=0x100|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x88: dom=1|xn=0|tex=1|C=0|B=0
+TRACE:lockdown_print_entry:   idx=2
+TRACE:lockdown_print_entry:     va_ent=0x7f00200: va=0x7f00|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x7f000c3: pa=0x7f00|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x88: dom=1|xn=0|tex=1|C=0|B=0
+TRACE:lockdown_print_entry:   idx=3
+TRACE:lockdown_print_entry:     va_ent=0x8f00200: va=0x8f00|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x8f000c3: pa=0x8f00|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x88: dom=1|xn=0|tex=1|C=0|B=0
+TRACE:lockdown_print_entry:   idx=4
+TRACE:lockdown_print_entry:     va_ent=0x20000200: va=0x20000|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x200000c1: pa=0x20000|nsa=0|nstid=0|size=11|apx=0|v=1
+TRACE:lockdown_print_entry:     attr=0x80: dom=1|xn=0|tex=0|C=0|B=0
+TRACE:lockdown_print_entry:   idx=5
+TRACE:lockdown_print_entry:     va_ent=0x20100200: va=0x20100|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x201000c3: pa=0x20100|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x80: dom=1|xn=0|tex=0|C=0|B=0
+TRACE:lockdown_print_entry:   idx=6
+TRACE:lockdown_print_entry:     va_ent=0x20200200: va=0x20200|G=1|ASID=0
+TRACE:lockdown_print_entry:     pa_ent=0x202000c3: pa=0x20200|nsa=0|nstid=0|size=11|apx=1|v=1
+TRACE:lockdown_print_entry:     attr=0x80: dom=1|xn=0|tex=0|C=0|B=0
+TRACE:lockdown_print_entry:   idx=7
+TRACE:lockdown_print_entry:     [invalid entry 7]
+TRACE:lockdown_print_entries:----- ---------------------------------- 
+data abort
+FAULT: PC = 0x802c, Fault Address = 0x20000000, DFSR = 0x1d
+asid: 0x0
+Testing STORE fault at 0x20000000
+asid: 0x0
+data abort
+FAULT: PC = 0x8024, Fault Address = 0x20000000, DFSR = 0x81d
+asid: 0x0
+Testing JUMP fault at 0x104000
+asid: 0x0
+prefetch abort
+asid: 0x0
+PREFETCH FAULT: PC = 0x104000, Fault Address = 0x20000000, IFSR = 0xd
+SUCCESS!!
+DONE!!!
+
+bootloader: pi exited.  cleaning up
