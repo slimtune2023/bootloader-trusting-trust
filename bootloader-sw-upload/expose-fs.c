@@ -6,15 +6,15 @@ void notmain() {
   kmalloc_init(FAT32_HEAP_MB);
   pi_sd_init();
 
-  printk("Reading the MBR.\n");
+  // printk("Reading the MBR.\n");
   mbr_t *mbr = mbr_read();
 
-  printk("Loading the first partition.\n");
+  // printk("Loading the first partition.\n");
   mbr_partition_ent_t partition;
   memcpy(&partition, mbr->part_tab1, sizeof(mbr_partition_ent_t));
   assert(mbr_part_is_fat32(partition.part_type));
 
-  printk("Loading the FAT.\n");
+  // printk("Loading the FAT.\n");
   fat32_fs_t fs = fat32_mk(&partition);
 
   printk("Loading the root directory.\n");
@@ -32,19 +32,18 @@ void notmain() {
     }
   }
 
-  printk("Creating hello.txt\n");
-  char *hello_name = "B.TXT";
-  fat32_delete(&fs, &root, hello_name);
-  // assert(fat32_create(&fs, &root, hello_name, 0));
-  char *data = "Hello, World these are random characters I need to do stuff!!!\n";
-  pi_file_t hello = (pi_file_t) {
-    .data = data,
-    .n_data = strlen(data),
-    .n_alloc = strlen(data),
-  };
+  printk("\nLooking for secret.txt.\n");
+  char *name = "SECRET.TXT";
+  pi_dirent_t *config = fat32_stat(&fs, &root, name);
+  demand(config, secret.txt not found!\n);
 
-  // assert(fat32_write(&fs, &root, hello_name, &hello));
-  printk("Check your SD card for a file called 'HELLO.TXT'\n");
+  printk("Reading secret.txt.\n");
+  pi_file_t *file = fat32_read(&fs, &root, name);
 
-  printk("PASS: %s\n", __FILE__);
+  printk("Printing secret.txt (%d bytes):\n", file->n_data);
+  printk("--------------------\n");
+  for (int i = 0; i < file->n_data; i++) {
+    printk("%c", file->data[i]);
+  }
+  printk("--------------------\n");
 }

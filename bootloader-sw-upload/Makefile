@@ -18,8 +18,9 @@ COMMON_SRC += fat32.c
 STAFF_OBJS += $(CS140E_2025_PATH)/libpi/staff-objs/kmalloc.o 
 
 # the tests in decreasing order of difficulty.
-PROGS := boot-sw-upload.c
-PROGS += boot-sw-upload-led.c
+# PROGS := boot-sw-upload.c
+# PROGS += boot-sw-upload-led.c
+PROGS += expose-fs.c
 
 CFLAGS_EXTRA  = -Iexternal-code
 
