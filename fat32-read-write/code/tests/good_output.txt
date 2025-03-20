@@ -1,0 +1,46 @@
+my-install  ./tests/2-fat32-read.bin
+DEBUG:done with options: dev name=</dev/ttyUSB0>, pi-prog=<./tests/2-fat32-read.bin>, trace=0
+DEBUG:FOUND:</dev/ttyUSB0>
+DEBUG:my-install: tty-usb=</dev/ttyUSB0> program=<./tests/2-fat32-read.bin>: about to boot
+TRACE:simple_boot: sending 33424 bytes, crc32=1287647d
+BOOT:waiting for a start
+PI-SIDE: Sai was here
+PI-SIDE: Received program!
+BOOT:bootloader: Done.
+Reading the MBR.
+Loading the first partition.
+Loading the FAT.
+Loading the root directory.
+Listing files:
+Got 11 files.
+        F: BLINK-~1.BIN (cluster 3; 72 bytes)
+        F: BLINK-~2.BIN (cluster 4; 3808 bytes)
+        F: BOOTCODE.BIN (cluster 5; 50248 bytes)
+        F: BOOTLO~1.BIN (cluster 7; 2067364 bytes)
+        F: CONFIG.TXT (cluster 71; 179 bytes)
+        F: HELLO.BIN (cluster 72; 1404 bytes)
+        F: KERNEL.IMG (cluster 2439; 2067156 bytes)
+        F: START.ELF (cluster 137; 2818884 bytes)
+        D: TRASH-~1.    (cluster 224)
+        F: HELLO-F.BIN (cluster 2503; 2540 bytes)
+        F: TEMP.TXT (cluster 0; 0 bytes)
+Looking for config.txt.
+Reading config.txt.
+Printing config.txt (179 bytes):
+--------------------
+gpu_mem=64
+
+arm_freq=700
+core_freq=250
+
+kernel=kernel.img
+kernel_address=0x8000
+
+# on the pi zero w you need this line or it won't work.
+# zhouheng sun found this!
+enable_uart=1
+--------------------
+PASS: tests/2-fat32-read.c
+DONE!!!
+
+bootloader: pi exited.  cleaning up
