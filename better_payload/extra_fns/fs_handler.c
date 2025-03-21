@@ -2,6 +2,8 @@
 #include "mmu.h"
 #include "full-except.h"
 #include "asm-helpers.h"
+#include "pi-sd.h"
+#include "fat32.h"
 
 #define MB(x) ((x)*1024*1024)
 
@@ -27,6 +29,53 @@ enum {
 cp_asm_get(cp15_fault_addr, p15, 0, c6, c0, 0);
 cp_asm_get(cp15_dfsr, p15, 0, c5, c0, 0);
 
+void printfs(void) {
+    kmalloc_init_set_start((uint32_t *)0x7000000, FAT32_HEAP_MB);
+    pi_sd_init();
+  
+    // printk("Reading the MBR.\n");
+    mbr_t *mbr = mbr_read();
+  
+    // printk("Loading the first partition.\n");
+    mbr_partition_ent_t partition;
+    memcpy(&partition, mbr->part_tab1, sizeof(mbr_partition_ent_t));
+    assert(mbr_part_is_fat32(partition.part_type));
+  
+    // printk("Loading the FAT.\n");
+    fat32_fs_t fs = fat32_mk(&partition);
+  
+    printk("Loading the root directory.\n");
+  
+    pi_dirent_t root = fat32_get_root(&fs);
+  
+    printk("Listing files:\n");
+    uint32_t n;
+    pi_directory_t files = fat32_readdir(&fs, &root);
+    printk("Got %d files.\n", files.ndirents);
+    for (int i = 0; i < files.ndirents; i++) {
+      if (files.dirents[i].is_dir_p) {
+        printk("\tD: %s (cluster %d)\n", files.dirents[i].name, files.dirents[i].cluster_id);
+      } else {
+        printk("\tF: %s (cluster %d; %d bytes)\n", files.dirents[i].name, files.dirents[i].cluster_id, files.dirents[i].nbytes);
+      }
+    }
+  
+    printk("\nLooking for secret.txt.\n");
+    char *name = "SECRET.TXT";
+    pi_dirent_t *config = fat32_stat(&fs, &root, name);
+    demand(config, secret.txt not found!\n);
+  
+    printk("Reading secret.txt.\n");
+    pi_file_t *file = fat32_read(&fs, &root, name);
+  
+    printk("Printing secret.txt (%d bytes):\n", file->n_data);
+    printk("--------------------\n");
+    for (int i = 0; i < file->n_data; i++) {
+      printk("%c", file->data[i]);
+    }
+    printk("--------------------\n");
+  }
+
 void cleanup(void) {
     // mmu_disable();
     assert(!mmu_is_enabled());
@@ -39,6 +88,8 @@ void cleanup(void) {
     for (int i = 0; i < nbytes; i++) {
         printk("%c", buf[i]);
     }
+    
+    printfs();
 
     // this triggers done
     printk("\n-----------------\n\n");
@@ -46,15 +97,8 @@ void cleanup(void) {
 
     uart_flush_tx();
     delay_ms(10);
-    
-    int led = 20;
-    gpio_set_output(led);
-    for(int i = 0; i < 10; i++) {
-        gpio_set_on(led);
-        delay_cycles(3000000);
-        gpio_set_off(led);
-        delay_cycles(3000000);
-    }
+
+    // rpi_reboot();
 }
 
 // Fault handler to verify exception details

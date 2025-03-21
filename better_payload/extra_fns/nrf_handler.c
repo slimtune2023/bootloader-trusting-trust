@@ -3,6 +3,27 @@
 #include "full-except.h"
 #include "asm-helpers.h"
 
+#include "nrf-test.h"
+
+// useful to mess around with these. 
+enum { ntrial = 1000, timeout_usec = 1000, nbytes_nrf = 4 };
+
+// example possible wrapper to recv a 32-bit value.
+static int net_get32(nrf_t *nic, uint32_t *out) {
+    int ret = nrf_read_exact_timeout(nic, out, 4, timeout_usec);
+    if(ret != 4) {
+        // debug("receive failed: ret=%d\n", ret);
+        return 0;
+    }
+    return 1;
+}
+// example possible wrapper to send a 32-bit value.
+static void net_put32(nrf_t *nic, uint32_t txaddr, uint32_t x) {
+    int ret = nrf_send_ack(nic, txaddr, &x, 4);
+    if(ret != 4)
+        panic("ret=%d, expected 4\n");
+}
+
 #define MB(x) ((x)*1024*1024)
 
 #define RESERVED 0x6000000
@@ -27,6 +48,39 @@ enum {
 cp_asm_get(cp15_fault_addr, p15, 0, c6, c0, 0);
 cp_asm_get(cp15_dfsr, p15, 0, c5, c0, 0);
 
+static nrf_t n;
+
+static uint32_t * 
+recieve(nrf_t *c) {
+    unsigned client_addr = c->rxaddr;
+    printk("*** client address: %x ***\n\n", client_addr);
+    
+    // server to client
+    uint32_t got;
+    uint32_t iter = 0;
+    while(!net_get32(c, &got)) {
+        if (iter % 1000 == 0)
+            printk("waiting... %d\n", iter);
+        // delay_ms(10);
+        iter++;
+    }
+    uint32_t nmsg = got;
+
+    printk("nmsg: %x\n", nmsg);
+
+    uint32_t *buf = kmalloc(0x10000);
+    for (int i = 0; i < nmsg; i++) {
+        while(!net_get32(c, &got)) {
+            // printk("lost packet\n");
+            ;
+        }
+        *(buf + i) = got;
+        // printk("got packet\n");
+    }
+
+    return buf;
+}
+
 void cleanup(void) {
     // mmu_disable();
     assert(!mmu_is_enabled());
@@ -40,21 +94,33 @@ void cleanup(void) {
         printk("%c", buf[i]);
     }
 
+    nrf_t *c = client_mk_ack(&n, client_addr, nbytes_nrf);
+    nrf_stat_start(c);
+    uint32_t *buffer = recieve(c);
+
+    printk("RUNNING PROG\n");
+
+    uint32_t buf_size = sizeof(buffer);
+
+    delay_ms(100);
+
+    memcpy((void *)0x8000, buffer, buf_size);
+
+    printk("first word at 0x8000 = %x\n", *(uint32_t *)0x8000);
+
+    delay_ms(100);
+
+    void (*code_fn)(void) = (void (*)(void)) 0x8000;
+    code_fn();
+
     // this triggers done
     printk("\n-----------------\n\n");
     printk("SUCCESS!!\n");
 
     uart_flush_tx();
     delay_ms(10);
-    
-    int led = 20;
-    gpio_set_output(led);
-    for(int i = 0; i < 10; i++) {
-        gpio_set_on(led);
-        delay_cycles(3000000);
-        gpio_set_off(led);
-        delay_cycles(3000000);
-    }
+
+    // rpi_reboot();
 }
 
 // Fault handler to verify exception details

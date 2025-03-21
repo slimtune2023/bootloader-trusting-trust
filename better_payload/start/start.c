@@ -34,18 +34,19 @@ void notmain(void) {
     // printk("Abort handler -- %x, command: %x\n", 0x680014c, *(uint32_t *)(0x680014c));
     // BRANCHTO(target + 0x10);
     
-    kmalloc_init_set_start((void*)SEG_HEAP, MB(1));
+    // kmalloc_init_set_start((void*)SEG_HEAP, MB(1));
     
     assert((uint32_t)__prog_end__ < SEG_CODE + MB(1));
     assert((uint32_t)__code_start__ >= SEG_CODE);
 
     // printk("full install start\n");
     full_except_install(0);
-    full_except_set_data_abort((void (*)(regs_t *))(0x680014c));
+    full_except_set_data_abort((void (*)(regs_t *))(0x06800190));
     // printk("full install end\n");
 
-    void *null_pt = kmalloc_aligned(4096*4, 1<<14);
-    assert((uint32_t)null_pt % (1<<14) == 0);
+    // void *null_pt = kmalloc_aligned(4096*4, 1<<14);
+    void *null_pt = (void *)(100 * 1024 * 1024);
+    // assert((uint32_t)null_pt % (1<<14) == 0);
 
     assert(!mmu_is_enabled());
 
@@ -60,13 +61,14 @@ void notmain(void) {
     mmu_init();
 
     pin_mmu_sec(0, SEG_CODE, SEG_CODE, kern);
-    pin_mmu_sec(1, SEG_HEAP, SEG_HEAP, kern); 
+    // pin_mmu_sec(1, SEG_HEAP, SEG_HEAP, kern); 
 
     pin_mmu_sec(2, SEG_STACK, SEG_STACK, kern); 
     pin_mmu_sec(3, SEG_INT_STACK, SEG_INT_STACK, kern); 
 
-    pin_mmu_sec(4, SEG_BCM_0, SEG_BCM_0, dev); 
-    pin_mmu_sec(5, SEG_BCM_1, SEG_BCM_1, dev); 
+    printk("changed\n");
+    pin_mmu_sec(4, SEG_BCM_0 + MB(3), SEG_BCM_0 + MB(3), dev); 
+    pin_mmu_sec(5, SEG_BCM_0, SEG_BCM_0, dev); 
 
     domain_access_ctrl_set(DOM_client << dom_kern*2); 
     
