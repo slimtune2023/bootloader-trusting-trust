@@ -233,20 +233,20 @@ Disassembly of section .text:
   200314:	e1a01002 	mov	r1, r2
   200318:	e1a00006 	mov	r0, r6
   20031c:	eb000064 	bl	2004b4 <pin_mmu_sec>
-  200320:	e28d6050 	add	r6, sp, #80, 0	; 0x50
-  200324:	e896000f 	ldm	r6, {r0, r1, r2, r3}
-  200328:	e88d000f 	stm	sp, {r0, r1, r2, r3}
-  20032c:	e59d304c 	ldr	r3, [sp, #76]	; 0x4c
-  200330:	e3a02202 	mov	r2, #536870912	; 0x20000000
-  200334:	e1a01002 	mov	r1, r2
-  200338:	e1a00008 	mov	r0, r8
-  20033c:	eb00005c 	bl	2004b4 <pin_mmu_sec>
-  200340:	e59fc0c4 	ldr	ip, [pc, #196]	; 20040c <infect+0x1f8>
+  200320:	e59fc0e4 	ldr	ip, [pc, #228]	; 20040c <infect+0x1f8>
+  200324:	e28d6050 	add	r6, sp, #80, 0	; 0x50
+  200328:	e896000f 	ldm	r6, {r0, r1, r2, r3}
+  20032c:	e88d000f 	stm	sp, {r0, r1, r2, r3}
+  200330:	e59d304c 	ldr	r3, [sp, #76]	; 0x4c
+  200334:	e1a0200c 	mov	r2, ip
+  200338:	e1a0100c 	mov	r1, ip
+  20033c:	e1a00008 	mov	r0, r8
+  200340:	eb00005b 	bl	2004b4 <pin_mmu_sec>
   200344:	e896000f 	ldm	r6, {r0, r1, r2, r3}
   200348:	e88d000f 	stm	sp, {r0, r1, r2, r3}
   20034c:	e59d304c 	ldr	r3, [sp, #76]	; 0x4c
-  200350:	e1a0200c 	mov	r2, ip
-  200354:	e1a0100c 	mov	r1, ip
+  200350:	e3a02202 	mov	r2, #536870912	; 0x20000000
+  200354:	e1a01002 	mov	r1, r2
   200358:	e3a00005 	mov	r0, #5, 0
   20035c:	eb000054 	bl	2004b4 <pin_mmu_sec>
   200360:	e1a00008 	mov	r0, r8
@@ -291,8 +291,8 @@ Disassembly of section .text:
   2003fc:	e59f001c 	ldr	r0, [pc, #28]	; 200420 <infect+0x20c>
   200400:	eb00057e 	bl	201a00 <printk>
   200404:	eb0006b4 	bl	201edc <clean_reboot>
-  200408:	0680014c 	.word	0x0680014c
-  20040c:	20100000 	.word	0x20100000
+  200408:	06800190 	.word	0x06800190
+  20040c:	20300000 	.word	0x20300000
   200410:	20200000 	.word	0x20200000
   200414:	00202370 	.word	0x00202370
   200418:	002027c4 	.word	0x002027c4

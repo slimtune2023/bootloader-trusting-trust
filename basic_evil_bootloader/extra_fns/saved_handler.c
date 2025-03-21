@@ -39,22 +39,15 @@ void cleanup(void) {
     for (int i = 0; i < nbytes; i++) {
         printk("%c", buf[i]);
     }
-
+    
     // this triggers done
     printk("\n-----------------\n\n");
     printk("SUCCESS!!\n");
 
     uart_flush_tx();
     delay_ms(10);
-    
-    int led = 20;
-    gpio_set_output(led);
-    for(int i = 0; i < 10; i++) {
-        gpio_set_on(led);
-        delay_cycles(3000000);
-        gpio_set_off(led);
-        delay_cycles(3000000);
-    }
+
+    // rpi_reboot();
 }
 
 // Fault handler to verify exception details
