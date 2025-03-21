@@ -10,7 +10,8 @@
 # PROGS += $(wildcard tests/3-*.c)
 
 # PROGS += tests/2-ping-pong-ack-4bytes.c
-PROGS += tests/mytest.c
+# PROGS += tests/mytest.c
+PROGS += tests/recieve.c
 
 # PROGS := tests/2-one-way-ack-16bytes.c
 
