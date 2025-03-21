@@ -7,14 +7,13 @@
 # when developing: you should probably run "make" 
 # and look at the output to make sure it makes sense.
 
-# uncomment COMMON_SRC and comment out STAFF_OBJS
+LIBS += $(CS140E_2025_PATH)/lib/libgcc.a
+
 COMMON_SRC += mbr.c
-# STAFF_OBJS +=  staff-mbr.o
-
-# uncomment COMMON_SRC and comment out STAFF_OBJS
 COMMON_SRC += fat32.c
-# STAFF_OBJS +=  staff-fat32.o
+COMMON_SRC += nrf-hw-support.c nrf-public.c nrf-driver.c
 
+STAFF_OBJS += $(CS140E_2025_PATH)/libpi/staff-objs/staff-hw-spi.o
 STAFF_OBJS += $(CS140E_2025_PATH)/libpi/staff-objs/kmalloc.o 
 
 # the tests in decreasing order of difficulty.
